@@ -1,0 +1,57 @@
+FROM rocker/shiny-verse:4.3.0
+
+# Dependencies installation
+RUN apt-get update -qq \
+  && apt-get install -y \
+    --no-install-recommends \
+    git-core \
+    libssl-dev \
+    libcurl4-gnutls-dev \
+#    libsodium-dev \
+    libxml2-dev \
+    libprotobuf-dev protobuf-compiler libudunits2-dev libgdal-dev libgeos-dev libproj-dev libjq-dev \
+# For protolite in geojson, which seems to be used in shinycss
+#    libicu-dev \
+# For phyloseq
+    libigraph-dev  \
+# For krona
+    radiant \
+# Devtools, but probalbly use in other as well
+    libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev libglpk-dev libmagick++-dev  \
+    && apt-get clean && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+ENV _R_SHLIB_STRIP_=true
+
+# Install R library beforehand so I don't need to repeat this everytime I install packages.
+COPY DESCRIPTION /tmp/tmpdesc/
+RUN R -e "devtools::install_deps('/tmp/tmpdesc')"
+
+# Install package
+ARG PACKAGE=sysmiome.serve_0.0.0.0001.tar.gz
+COPY build/${PACKAGE} /tmp/
+RUN R -e "install.packages('/tmp/${PACKAGE}', repos = NULL)"
+
+# Install static file
+COPY www /srv/shiny-server/app/
+COPY shiny-server.conf /etc/shiny-server
+
+# Install app
+ARG GID=1000
+# Remove all sample apps
+RUN rm -rf /srv/shiny-server/*
+# Redundant, but serve as a reminder
+#USER shiny
+# Add shiny to group for writing permission.
+#RUN groupadd -g $GID appadmins
+#RUN usermod -a -G appadmins shiny
+ENV SHINY_LOG_STDERR=1
+
+# Copy the R script to run your Shiny app
+COPY app.R /srv/shiny-server/app/app.R
+
+# Expose the port for Shiny
+EXPOSE 3838
+
+# Run the Shiny app
+# CMD ["R", "-e", "sysmiomeserver::run_app()"]
+CMD ["/usr/bin/shiny-server"]

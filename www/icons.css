@@ -1,0 +1,83 @@
+.green-circle {
+    width: 5px;
+    height: 5px;
+    background-color: green;
+    border-radius: 50%;
+  }
+
+.red-circle {
+    width: 5px;
+    height: 5px;
+    background-color: red;
+    border-radius: 50%;
+  }
+
+.avatar{  overflow:hidden;   }
+
+.user-icon{
+  font-size:2em;  /* change font size should change size of icon */
+  float:left; margin:1em;  /* remove this line to avoid float/margin */
+}
+.user-icon{
+  border-radius:4em; border:1px solid skyblue;
+  height:6em; width:6em;  
+  background:none;padding:0.1em;  
+}
+
+.user-icon::before{
+  content:" "; display:block;
+  height:2em; width:2em;
+  background:skyblue;
+  position:relative; left:2em;top:0.8em;
+  border-radius:2em;
+}
+.user-icon::after{
+  content:" "; display:block;
+  height:2em;width:4em;
+  background:skyblue;
+  position:relative; left:1em;top:1em;
+  border-radius:2em 2em 0 0;
+}
+
+.red, .amber, .green{
+  display:block;
+  height:0em;width:0em;
+  background:none;
+  position:relative; left:3em;top:-2em;
+ }
+
+
+.red::after,.amber::after,.green::after{
+  content:" "; display:block;
+  height:1em;width:1em;
+  position:relative; left:1.4em;top:0em;
+  }
+
+.amber::after {
+  height:0;width:0;
+  border:.58em solid transparent;  
+  /* for eq Triangle  ratio is 1:1.16. 1.16/2=~.58 */
+  border-bottom:1em solid orange;
+  border-top:0em; /* important for positioning */  
+ }
+
+
+.red::after{background:red;}
+
+.green::after{background:green;border-radius:1em;}
+
+.font18{font-size:18px}
+
+.font5{font-size:5px}
+
+.green-icon {
+  color: rgb(0,166,90)
+}
+
+.red-icon {
+  color: rgb(200,20,20)
+}
+
+.yellow-icon {
+  color: rgb(220, 193, 7)
+}
