@@ -27,7 +27,10 @@ ui_taxa <- function(id = "ID_TAXA_MODULE") {
             width = 10,
             fluidPage(
                 div(
-                    shinycssloaders::withSpinner(plotOutput(ns("plot_bar")))
+                    style = "min-height: 300px;", # set a fixed height for the plotOutput
+                    shinycssloaders::withSpinner(
+                        plotOutput(ns("plot_bar"), height = "60vh")
+                    )
                 )
             )
         )
@@ -46,6 +49,7 @@ ui_taxa <- function(id = "ID_TAXA_MODULE") {
         mainPanel(
             width = 10,
             actionButton(ns("generate_html"), "Generate HTML"),
+            downloadButton(ns("download_html"), "Download HTML"),
             htmlOutput(ns("kronaframe"))
         )
     )
@@ -66,30 +70,6 @@ sv_taxa <- function(id = "ID_TAXA_MODULE", project_obj) {
     moduleServer(
         id,
         function(input, output, session) {
-            # dps <- reactive({
-            #     x_choices <- setdiff(colnames(project_obj()$get_filtered_metadata()$meta), "ID_sample")
-            #     x_choices <- c("", x_choices)
-
-            #     updateSelectInput(
-            #         session = session,
-            #         inputId = "tax_group",
-            #         choices = x_choices,
-            #         selected = NULL
-            #     )
-
-            #     updateSelectInput(
-            #         session = session,
-            #         inputId = "select_group",
-            #         choices = x_choices,
-            #         selected = NULL
-            #     )
-
-            #     project_obj()$get_taxa_data()
-
-            # }) |>
-            #     bindCache(project_obj()) |>
-            #     bindEvent(project_obj())
-
             observe({
                 x_choices <- setdiff(colnames(project_obj()$get_filtered_metadata()$meta), "ID_sample")
                 x_choices <- c("", x_choices)
@@ -111,6 +91,19 @@ sv_taxa <- function(id = "ID_TAXA_MODULE", project_obj) {
                 )
             })
 
+            ## Setting downloadable krona
+            temp_file_path <- reactiveVal(NULL) # Reactive value to store the temp file path
+
+            output$download_html <- downloadHandler(
+                filename = function() {
+                    paste("krona_plot", Sys.Date(), ".html", sep = "")
+                },
+                content = function(file) {
+                    req(temp_file_path()) # Ensure a file path is available
+                    file.copy(temp_file_path(), file)
+                }
+            )
+
             # Generate krona
             observeEvent(input$generate_html, {
                 dat_ps <- project_obj()$get_taxa_data()$ps
@@ -121,6 +114,8 @@ sv_taxa <- function(id = "ID_TAXA_MODULE", project_obj) {
                     # Save to a temporary HTML file
                     temp_file <- tempfile(fileext = ".html")
                     krona(dat_ps, temp_file)
+
+                    temp_file_path(temp_file)
 
                     # Make the temp file available as a URL in Shiny
                     temp_url <- paste("tmp", basename(temp_file), sep = "/")
@@ -156,6 +151,7 @@ sv_taxa <- function(id = "ID_TAXA_MODULE", project_obj) {
                     }
 
                     temp_file <- tempfile(fileext = ".html")
+                    temp_file_path(temp_file)
                     merge_krona(unlist(tmp_list), temp_file)
                     temp_url <- paste("tmp", basename(temp_file), sep = "/")
                     addResourcePath("tmp", dirname(temp_file))
@@ -178,6 +174,7 @@ sv_taxa <- function(id = "ID_TAXA_MODULE", project_obj) {
                     message = ""
                 )
             })
+
 
             output$plot_bar <- renderPlot({
                 req(project_obj())

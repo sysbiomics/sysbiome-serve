@@ -44,7 +44,6 @@ sv_overview <- function(id = "ID_OVERVIEW_VIEWER", project_obj) {
 
         output$json_table <- renderTable(
             {
-                jsonDat <- project_obj()$get_project_overview()
                 data <- parsed_data()
                 data_frame <- data.frame(
                     Key = c("ID", "Owner", "Name", "Run Command (Parameter)", "Run Command (Dataset)", "Status"),

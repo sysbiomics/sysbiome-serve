@@ -1,5 +1,4 @@
 ui_viewer <- function(id = "OUTER_UID") {
-
     ns <- NS(id)
 
     tagList(
@@ -11,7 +10,8 @@ ui_viewer <- function(id = "OUTER_UID") {
             tabPanel("Beta Diversity", ui_beta(id = ns("beta"))),
             tabPanel("Taxa analysis", ui_taxa(id = ns("taxa"))),
             tabPanel("Functional analysis", ui_function(id = ns("function"))),
-    ))
+        )
+    )
 }
 
 #' @import echarts4r
@@ -32,5 +32,3 @@ ui_server <- function(id = "OUTER_UID", project_obj) {
         sv_function("function", project_obj)
     })
 }
-
-

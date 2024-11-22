@@ -27,8 +27,9 @@ ui_beta <- function(id = "ID_BETA_MODULE") {
             width = 10,
             tagList(
                 div(
+                    style = "min-height: 300px;", # set a fixed height for the plotOutput
                     shinycssloaders::withSpinner(
-                        plotOutput(ns("plot_beta"))
+                        plotOutput(ns("plot_beta"), height = "60vh")
                     ),
                 ),
                 selectInput(
@@ -54,7 +55,7 @@ sv_beta <- function(id = "ID_BETA_MODULE", project_obj) {
         function(input, output, session) {
             dbe <- reactive({
                 x_choices <- setdiff(colnames(project_obj()$get_filtered_metadata()$meta), "ID_sample")
-                x_choices <- c("", x_choices)
+                x_choices <- c("Select an option", x_choices)
 
                 updateSelectInput(
                     session = session,
@@ -68,41 +69,31 @@ sv_beta <- function(id = "ID_BETA_MODULE", project_obj) {
                 bindCache(project_obj()) |>
                 bindEvent(project_obj())
 
+            output$plot_beta <- renderPlot({
+                dat_beta <- dbe()
 
-            # observe({
-            #     req(project_obj())
+                plotType <- input$beta_measure
+                colourBy <- input$color_measure
 
-            #     xchoices <- setdiff(colnames(project_obj()$get_filtered_metadata()$meta), "ID_sample")
-            #     xchoices <- c("", xchoices) # Add an empty choice as the first option
 
-            #     updateSelectInput(
-            #         session = session,
-            #         inputId = "color_measure",
-            #         choices = xchoices,
-            #         selected = NULL
-            #     )
-            # })
+                if (is.null(colourBy) || colourBy == "Select an option") {
+                    # Show a placeholder message
+                    plot(1, type = "n", xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+                    text(1, 1, "Please select a colour first.", cex = 1.5, col = "red")
+                    return()
+                }
 
-            output$plot_beta <- renderPlot(
-                {
-                    dat_beta <- dbe()
+                dat <- dat_beta %>%
+                    purrr::pluck(plotType) %>%
+                    left_join(dat_beta$meta, by = "ID_sample")
 
-                    plotType <- input$beta_measure
-                    colourBy <- input$color_measure
+                x_axis <- colnames(dat)[2]
+                y_axis <- colnames(dat)[3]
 
-                    dat <- dat_beta %>%
-                        purrr::pluck(plotType) %>%
-                        left_join(dat_beta$meta, by = "ID_sample")
-
-                    x_axis <- colnames(dat)[2]
-                    y_axis <- colnames(dat)[3]
-
-                    ggplot(data = dat, aes(x = .data[[x_axis]], y = .data[[y_axis]], color = factor(.data[[colourBy]]))) +
-                        geom_point(size = 4) +
-                        stat_ellipse(linetype = 2)
-                },
-                width = 600,
-            )
+                ggplot(data = dat, aes(x = .data[[x_axis]], y = .data[[y_axis]], color = factor(.data[[colourBy]]))) +
+                    geom_point(size = 4) +
+                    stat_ellipse(linetype = 2)
+            }, )
         }
     )
 }

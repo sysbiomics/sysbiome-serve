@@ -37,14 +37,14 @@ ui_alpha <- function(id = "ID_ALPHA_MODULE") {
             width = 10,
             tagList(
                 div(
-                    style = "height: 500px;", # set a fixed height for the plotOutput
+                    style = "min-height: 300px;", # set a fixed height for the plotOutput
                     shinycssloaders::withSpinner(
-                        plotOutput(ns("plot_alpha")),
+                        plotOutput(ns("plot_alpha"), height = "60vh"),
                     )
                 ),
                 fluidRow(
                     column(
-                        width = 4,
+                        width = 2,
                         selectInput(
                             inputId = ns("export_data"),
                             label = "Export plot as",
@@ -55,12 +55,20 @@ ui_alpha <- function(id = "ID_ALPHA_MODULE") {
                         ),
                     ),
                     column(
-                        width = 4,
+                        width = 2,
                         br(), # Align with the export data selection
                         downloadButton(
                             outputId = ns("download_plot"),
                             label = "Export"
                         ),
+                    ),
+                    column(
+                        width = 2,
+                        br(), # Align with the export data selection
+                        downloadButton(
+                            outputId = ns("download_table"),
+                            label = "Export Table"
+                        )
                     ),
                 ),
                 tableOutput(ns("table_alpha"))
@@ -84,7 +92,7 @@ sv_alpha <- function(id = "ID_ALPHA_MODULE", project_obj) {
                     session = session,
                     inputId = "xlab_selection",
                     choices = xchoices,
-                    selected = NULL
+                    selected = "Select an option"
                 )
 
                 updateSelectInput(
@@ -139,10 +147,31 @@ sv_alpha <- function(id = "ID_ALPHA_MODULE", project_obj) {
                             dplyr::left_join(.dat_meta, by = "ID_sample") %>%
                             ggplot(aes(x = factor(.data[[xlab]]), y = value)) +
                             geom_boxplot() +
-                            facet_wrap(vars(interaction(.data[[group]], .data[["alpha_measure"]])), scales = "free_y")
+                            facet_grid(rows = vars(.data[["alpha_measure"]]), cols = vars(.data[[group]]), scales = "free_y")
                     }
                 },
                 res = 96
+            )
+
+            # Generate a downloadable plot
+            output$download_plot <- downloadHandler(
+                filename = function() {
+                    paste0("alpha_diversity_plot.", input$export_data)
+                },
+                content = function(file) {
+                    ggsave(file, plot = isolate(output$plot_alpha()))
+                }
+            )
+
+            # Generate a downloadable table
+            output$download_table <- downloadHandler(
+                filename = function() {
+                    "alpha_diversity_table.csv"
+                },
+                content = function(file) {
+                    dat_alpha <- adat()
+                    write.csv(dat_alpha$alpha, file, row.names = FALSE)
+                }
             )
         }
     )

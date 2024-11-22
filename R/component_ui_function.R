@@ -5,6 +5,19 @@
 ui_function <- function(id = "ID_TAXA_MODULE") {
     ns <- NS(id)
 
+    testPlot <- sidebarLayout(
+        sidebarPanel(
+            width = 2,
+            tagList()
+        ),
+        mainPanel(
+            width = 10,
+            tagList(
+                echarts4rOutput(ns("sankey_chart"))
+            )
+        )
+    )
+
     ecPlot <- tagList(
         DTOutput(ns("ecTable"))
     )
@@ -17,9 +30,6 @@ ui_function <- function(id = "ID_TAXA_MODULE") {
         DTOutput(ns("ptTable"))
     )
 
-    testPlot <- tagList(
-        echarts4rOutput(ns("sankey_chart"))
-    )
 
     tabsetPanel(
         tabPanel("EC", ecPlot),
@@ -41,8 +51,8 @@ sv_function <- function(id = "ID_FUNCTION_MODULE", project_obj) {
                 DT::datatable(
                     data,
                     options = list(
-                        pageLength = 10, # Number of rows per page
-                        lengthMenu = c(10, 25, 50, 100, 200), # Options for number of rows per page
+                        pageLength = 15, # Number of rows per page
+                        lengthMenu = c(15, 25, 50, 100, 200), # Options for number of rows per page
                         searching = TRUE, # Enable searching
                         scrollX = TRUE, # Enable horizontal scrolling
                         scrollY = 400, # Vertical scroll height
@@ -53,8 +63,8 @@ sv_function <- function(id = "ID_FUNCTION_MODULE", project_obj) {
 
             output$koTable <- renderDT({
                 data <- project_obj()$get_kofunc_data()
-                fpath <- system.file("extdata", "ko00001.tsv.gz", package = "sysmiome.serve")
-                read_tsv(fpath)
+                fpath <- system.file("ko_mapfiles", "ko00001.tsv.gz", package = "sysmiome.serve")
+                ko_group <- read_tsv(fpath)
                 # remap KO data into categories
                 renderTab(data)
             })
