@@ -23,6 +23,7 @@ ui_function <- function(id = "ID_TAXA_MODULE") {
     )
 
     koPlot <- tagList(
+        echarts4rOutput(ns("ko_sankey"), height = "80vh"), # Output for the Sankey diagram
         DTOutput(ns("koTable"))
     )
 
@@ -61,29 +62,42 @@ sv_function <- function(id = "ID_FUNCTION_MODULE", project_obj) {
                 )
             }
 
-            output$koTable <- renderDT({
-                data <- project_obj()$get_kofunc_data()
-                fpath <- system.file("ko_mapfiles", "ko00001.tsv.gz", package = "sysmiome.serve")
-                ko_group <- read_tsv(fpath)
-                # remap KO data into categories
-                renderTab(data)
+            output$ko_sankey <- renderEcharts4r({
+                data <- project_obj()$get_ko_sankey()
+
+                # data <- data.frame(
+                #     source = c("A", "A", "B", "C", "C"),
+                #     target = c("B", "C", "C", "D", "E"),
+                #     value = c(5, 10, 15, 20, 25)
+                # )
+                data |>
+                    e_charts() |>
+                    e_sankey(source, target, value) |>
+                    e_tooltip(trigger = "item") # Add tooltips to show info on hover
             })
+
+            output$koTable <- renderDT({
+                # For table, I think
+                ko_rawdat <- project_obj()$get_kofunc_data()
+                renderTab(ko_rawdat)
+            })
+
             output$ecTable <- renderDT({
                 data <- project_obj()$get_ecfunc_data()
                 renderTab(data)
             })
+
             output$ptTable <- renderDT({
                 data <- project_obj()$get_ptfunc_data()
                 renderTab(data)
             })
 
-            data <- data.frame(
-                source = c("A", "A", "B", "C", "C"),
-                target = c("B", "C", "C", "D", "E"),
-                value = c(5, 10, 15, 20, 25)
-            )
-
             output$sankey_chart <- renderEcharts4r({
+                data <- data.frame(
+                    source = c("A", "A", "B", "C", "C"),
+                    target = c("B", "C", "C", "D", "E"),
+                    value = c(5, 10, 15, 20, 25)
+                )
                 data |>
                     e_charts() |>
                     e_sankey(source, target, value) |>

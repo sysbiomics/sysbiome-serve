@@ -1,4 +1,5 @@
 #' @export
+#' @import forcats
 #' @importFrom dplyr mutate
 #' @importFrom phyloseq phyloseq otu_table tax_table sample_data
 #' @importFrom tidyr replace_na
@@ -138,6 +139,7 @@ tree.list <- function(file.or.dir) {
 #' @return phyloseq object
 #' @export
 #' @importFrom dplyr mutate
+#' @importFrom tidyr pivot_longer
 #' @importFrom phyloseq phyloseq otu_table tax_table sample_data
 #' @importFrom tidyr replace_na
 #' @importFrom ape read.tree
@@ -285,24 +287,67 @@ Project <- R6::R6Class("Project",
         },
         get_ecfunc_data = function() {
             ec_dat <- readr::read_tsv(file.path(self$folder_path, "picrust2/EC_pred_metagenome_unstrat_descrip.tsv"), show_col_types = FALSE) |>
-                dplyr::rename_with(.cols = 1, ~"ID_sample")
+                dplyr::rename_with(.cols = 1, ~"EC_ID")
         },
         get_kofunc_data = function() {
             ec_dat <- readr::read_tsv(file.path(self$folder_path, "picrust2/KO_pred_metagenome_unstrat_descrip.tsv"), show_col_types = FALSE) |>
-                dplyr::rename_with(.cols = 1, ~"ID_sample")
+                dplyr::rename_with(.cols = 1, ~"KO_ID")
+        },
+        get_ko_sankey = function() {
+            ko_rawdat <- self$get_kofunc_data()
+            fpath <- system.file("ko_mapfiles", "ko00001.tsv.gz", package = "sysmiome.serve")
+            ko_map <- read_tsv(fpath)
+
+            ko_datfull <- ko_rawdat %>%
+                dplyr::select(-description) %>%
+                tidyr::pivot_longer(-c(KO_ID)) %>%
+                group_by(KO_ID) %>%
+                summarize(gene_count = sum(value)) %>%
+                left_join(ko_map, c("KO_ID" = "KO"))
+
+            ko_sankey <- ko_datfull %>%
+                # Create connections between level1 and level2
+                transmute(source = level1, target = level2, value = gene_count) %>%
+                bind_rows(
+                    # Add connections between level2 and level3
+                    ko_datfull %>% transmute(source = level2, target = level3, value = gene_count)
+                )
+
+            # Filtered time. Since the data is too much to display. I would get only top 20 of second and top 30 of the third
+            aggregated_data <- ko_datfull %>%
+                group_by(level1, level2, level3) %>%
+                summarise(total_gene_count = sum(gene_count), .groups = "drop")
+
+            # Step 2: Lump level2 into top 10 categories + "Others"
+            aggregated_data <- aggregated_data %>%
+                mutate(level2 = forcats::fct_lump_n(level2, n = 15, w = total_gene_count)) %>%
+                mutate(level3 = forcats::fct_lump_n(level3, n = 50, w = total_gene_count))
+
+            agg_sankey <- bind_rows(
+                aggregated_data %>%
+                    group_by(level1, level2) %>%
+                    summarise(value = sum(total_gene_count), .groups = "drop") %>%
+                    transmute(source = level1, target = as.character(level2), value),
+                aggregated_data %>%
+                    group_by(level2, level3) %>%
+                    summarise(value = sum(total_gene_count), .groups = "drop") %>%
+                    transmute(source = as.character(level2), target = as.character(level3), value)
+            )
+
+            ko_sankey
         },
         get_ptfunc_data = function() {
             ec_dat <- readr::read_tsv(file.path(self$folder_path, "picrust2/METACYC_path_abun_unstrat_descrip.tsv"), show_col_types = FALSE) |>
-                dplyr::rename_with(.cols = 1, ~"ID_sample")
+                dplyr::rename_with(.cols = 1, ~"METACYC_ID")
         },
         get_project_overview = function() {
             json_location <- file.path(self$folder_path, "overview.json")
             json_content <- paste(readLines(json_location), collapse = "\n")
             json_content
         },
-        get_project_ps = function(){
-            file.path(self$folder_path, "phyloseq/complete/phyloseq.RDS")
-        },
+        # get_project_ps = function() {
+        #     file.path(self$folder_path, "phyloseq/complete/phyloseq.RDS")
+        # },
         get_project_id = function() {
             return(basename(self$folder_path))
         }

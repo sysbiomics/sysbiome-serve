@@ -159,7 +159,7 @@ sv_alpha <- function(id = "ID_ALPHA_MODULE", project_obj) {
                     paste0("alpha_diversity_plot.", input$export_data)
                 },
                 content = function(file) {
-                    ggsave(file, plot = isolate(output$plot_alpha()))
+                    ggsave(file, plot = ggplot2::last_plot())
                 }
             )
 

@@ -48,7 +48,10 @@ project_selection_server <- function(id, tower) {
         # Update selected project when input changes
         observeEvent(input$project_select, {
             if (!is.null(input$project_select) && input$project_select != "") {
+                showPageSpinner(caption = (div(strong("Loading project"), br(), em("Please wait"))))
+                Sys.sleep(2)
                 selected_project(input$project_select)
+                hidePageSpinner()
             }
         })
 

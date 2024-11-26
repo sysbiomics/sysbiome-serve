@@ -5,6 +5,20 @@ pipeline_list <- c(
 
 ui_new_project <- function(id = "ID_NEW_MODULE") {
   ns <- NS(id)
+
+  # collapse_compo(
+  #   list(header = "Upload fastq", content = h1("Content 1")),
+  #   list(header = "Upload fastq", content = h1("Content 2")),
+  #   list(header = "Upload fastq", content = h1("Content 3") )
+  # )
+
+# ui <- fluidPage(
+#     collapse_compo(
+#         list(header = "Box 1 Header", content = "Content of Box 1"),
+#         list(header = "Box 2 Header", content = "Content of Box 2"),
+#         list(header = "Box 3 Header", content = "Content of Box 3")
+#     )
+
   sidebarLayout(
     sidebarPanel(
       fluidPage(

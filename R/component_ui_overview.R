@@ -15,7 +15,10 @@ ui_overview <- function(id = "ID_OVERVIEW_VIEWER") {
     ns <- NS(id)
     tagList(
         titlePanel("Project Overview"),
-        tableOutput(ns("json_table")),
+        div(
+            tableOutput(ns("json_table")),
+            style = "font-size:150%"
+        ),
         downloadButton(
             outputId = ns("download_data"),
             label = "Download data"
@@ -25,38 +28,75 @@ ui_overview <- function(id = "ID_OVERVIEW_VIEWER") {
 
 #' @import jsonlite
 #' @noRd
-sv_overview <- function(id = "ID_OVERVIEW_VIEWER", project_obj) {
+sv_overview <- function(id = "ID_OVERVIEW_VIEWER", project_obj_reactive) {
     moduleServer(id, function(input, output, session) {
         parsed_data <- reactive({
-            jsonlite::fromJSON(json_data)
-        })
+            jsondat <- jsonlite::fromJSON(project_obj_reactive()$get_project_overview())
+            # Add ASV, number of samples, and metadata.
+            ps_list <- project_obj_reactive()$get_taxa_data()
+            ps_dat <- ps_list$ps
+            metadata <- ps_list$meta
+            jsondat$`Samples (n)` <- nsamples(ps_dat)
+            jsondat$`Metadata (n)` <- ncol(metadata)
+
+            jsondat
+        }) |> bindEvent(project_obj_reactive())
 
         output$download_data <- downloadHandler(
             filename = function() {
-                "phyloseq.RDS"
+                paste0(project_obj_reactive()$get_project_id(), ".zip")
             },
-            content = function(con) {
-                proj_loc <- "/sysmiome/public_data/chula_03_phase"
-                file_loc <- file.path(proj_loc, "/phyloseq/complete/phyloseq.RDS")
-                file.copy(file_loc, con)
-            }
+            content = function(file) {
+                # Create a temporary directory
+                temp_dir <- tempdir()
+                zip_file <- file.path(temp_dir, "temp.zip")
+
+                # Get the project directory
+                proj_loc <- project_obj_reactive()$folder_path
+
+                # Create zip file using R's built-in zip function
+                withCallingHandlers(
+                    {
+                        zip::zip(
+                            zipfile = zip_file,
+                            files = list.files(proj_loc, recursive = TRUE, full.names = TRUE),
+                            root = proj_loc
+                        )
+
+                        # Copy the zip file to the download location
+                        file.copy(zip_file, file)
+
+                        # Clean up
+                        unlink(zip_file)
+                    },
+                    error = function(e) {
+                        # Log error and provide feedback
+                        message("Error creating zip file: ", e$message)
+                        stop(e)
+                    }
+                )
+            },
+            contentType = "application/zip"
         )
 
         output$json_table <- renderTable(
             {
                 data <- parsed_data()
-                data_frame <- data.frame(
-                    Key = c("ID", "Owner", "Name", "Run Command (Parameter)", "Run Command (Dataset)", "Status"),
-                    Value = c(
-                        data$id,
-                        data$owner,
-                        data$name,
-                        data$run_command$parameter,
-                        data$run_command$dataset,
-                        data$status
-                    )
+
+                if (length(data) == 0) {
+                    return(data.frame(Name = integer(0), Value = character(0)))
+                }
+
+                flattened <- unlist(data, recursive = TRUE)
+
+                # Convert to data frame
+                df <- data.frame(
+                    Name = names(flattened),
+                    Value = as.character(flattened),
+                    stringsAsFactors = FALSE
                 )
-                data_frame
+
+                df
             },
             align = "l",
             width = "100%",

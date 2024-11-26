@@ -7,16 +7,16 @@ app_server <- function(input, output, session) {
 
     log_info("Starting SYSMIOME")
 
+
     # Hard code the base folder
     session$userData$BASEFOLDER <- "/sysmiome"
 
     tower <- Tower$new("/sysmiome")
-    project_id <- reactiveVal("demo")
     project_id <- project_selection_server("project_selector", tower)
 
     project_obj <- reactive({
         return(tower$get_project(project_id()))
-    })
+    }) |> bindEvent(project_id())
 
     shiny::isolate({
         hostname <- session$clientData$url_hostname
@@ -59,4 +59,5 @@ app_server <- function(input, output, session) {
     #   session$token, "/dataobj/", namekk
     # )
     # print(uri)
+    
 }

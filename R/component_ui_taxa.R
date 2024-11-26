@@ -58,8 +58,8 @@ ui_taxa <- function(id = "ID_TAXA_MODULE") {
 
     tabsetPanel(
         tabPanel("Barplot", taxbarplot),
-        tabPanel("Kronaplot", kronaplot),
-        tabPanel("testPlot", testplot),
+        tabPanel("Kronaplot", kronaplot)
+        # tabPanel("testPlot", testplot),
     )
 }
 
@@ -73,8 +73,6 @@ sv_taxa <- function(id = "ID_TAXA_MODULE", project_obj) {
             observe({
                 x_choices <- setdiff(colnames(project_obj()$get_filtered_metadata()$meta), "ID_sample")
                 x_choices <- c("", x_choices)
-
-                # print(x_choices)
 
                 updateSelectInput(
                     session = session,
@@ -110,7 +108,12 @@ sv_taxa <- function(id = "ID_TAXA_MODULE", project_obj) {
 
                 grouping <- input$select_group
 
+                hidePageSpinner()
+
+
                 if (is.null(grouping) || grouping == "") { # if no grouping
+                    showPageSpinner(caption = (div(strong("Generating KRONA"), br(), em("Please wait"))))
+
                     # Save to a temporary HTML file
                     temp_file <- tempfile(fileext = ".html")
                     krona(dat_ps, temp_file)
@@ -122,6 +125,8 @@ sv_taxa <- function(id = "ID_TAXA_MODULE", project_obj) {
                     addResourcePath("tmp", dirname(temp_file))
 
                     logger::log_info("Create HTML successfully")
+                    hidePageSpinner()
+
 
                     output$kronaframe <- renderUI({
                         tags$iframe(src = temp_url, height = 800, width = "70%")
@@ -131,6 +136,9 @@ sv_taxa <- function(id = "ID_TAXA_MODULE", project_obj) {
                     updateQueryString("?generated=true", mode = "push")
                     session$sendCustomMessage(type = "updateIframe", message = temp_url)
                 } else { # If has group.  # Filter ps into each subset of group
+
+                    showPageSpinner(caption = (div(strong("Generating KRONA"), br(), em("Please wait"))))
+
 
                     metadata <- sample_data(dat_ps)
                     group_names <- unique(metadata[[grouping]])
@@ -157,6 +165,8 @@ sv_taxa <- function(id = "ID_TAXA_MODULE", project_obj) {
                     addResourcePath("tmp", dirname(temp_file))
 
                     logger::log_info("Create HTML successfully")
+                    hidePageSpinner()
+
 
                     output$kronaframe <- renderUI({
                         tags$iframe(src = temp_url, height = 800, width = "70%")

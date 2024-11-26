@@ -33,15 +33,15 @@ ui_beta <- function(id = "ID_BETA_MODULE") {
                     ),
                 ),
                 selectInput(
-                    inputId = ns("export_data"),
+                    inputId = ns("export_beta"),
                     label = "Export plot as",
                     choices = c(
                         "PNG" = "png",
                         "PDF" = "pdf"
                     ),
                 ),
-                actionButton(
-                    inputId = ns("export_data_button"),
+                downloadButton(
+                    outputId = ns("export_beta_button"),
                     label = "Export"
                 ),
             )
@@ -93,7 +93,16 @@ sv_beta <- function(id = "ID_BETA_MODULE", project_obj) {
                 ggplot(data = dat, aes(x = .data[[x_axis]], y = .data[[y_axis]], color = factor(.data[[colourBy]]))) +
                     geom_point(size = 4) +
                     stat_ellipse(linetype = 2)
-            }, )
+            })
+
+            output$export_beta_button <- downloadHandler(
+                filename = function() {
+                    paste0("beta_diversity_plot.", input$export_beta)
+                },
+                content = function(file) {
+                    ggsave(file, plot = ggplot2::last_plot())
+                }
+            )
         }
     )
 }

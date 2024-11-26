@@ -1,6 +1,6 @@
 Package: sysmiome.serve
 Title: Sysmiome-Serve: microbiome platform service
-Version: 0.0.0.0001
+Version: 0.0.3.0000
 Authors@R: 
     person("Preecha", "Patumcharoenpol", , "yumyai@gmail.com", role = c("cre", "aut"))
 Description: Soon.
@@ -15,6 +15,7 @@ Imports:
     dplyr,
     DT,
     echarts4r,
+    forcats,
     fs,
     ggplot2,
     glue,
@@ -32,6 +33,8 @@ Imports:
     shinycssloaders,
     tibble,
     tidyr
+Remotes:
+    git::https://github.com/daattali/shinycssloaders@2f2623fa8762c7351e5e6d044d3dae08a677b06f
 biocViews: Metagenomics,Microbiome,Sequencing,SystemsBiology
 Encoding: UTF-8
 LazyData: true
