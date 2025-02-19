@@ -30,6 +30,5 @@ SYSMIOME offers a [Docker image](https://hub.docker.com/r/yumyai/sysmiome-serve)
 
 This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
----
-
-*Additional details regarding installation, usage, and further documentation can be provided as needed.*
+## Contact
+For questions or support, please contact yumyai@gmail.com or open an issue on the GitHub repository.
