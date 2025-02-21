@@ -8,15 +8,25 @@ Tower <- R6::R6Class("Tower",
         #'
         #' @field base_folder A character string specifying the base folder path.
         base_folder = NULL,
+
+        #' List of project names
+        #'
+        #' @field num_projects ReactiveVal
+        num_projects = NULL,
+
         #' Initialize the Tower object
         #'
         #' @param base_folder A character string specifying the base folder path. Defaults to "/sysmiome".
         initialize = function(base_folder = "/sysmiome") {
             self$base_folder <- base_folder
+            self$num_projects <- reactiveVal(length(self$project_search()))
         },
+
+        #'
+        #' Search 
         #'
         #' @param project_id A project_id.
-        #' @return A...
+        #' @return A list of projects
         project_search = function(query = NULL) {
             projects_folder <- file.path(self$base_folder, "public_data")
             all_projects <- list.dirs(projects_folder, full.names = FALSE, recursive = FALSE)
@@ -60,6 +70,7 @@ Tower <- R6::R6Class("Tower",
         #'
         #' @return A.
         get_projects = function() {
+            
 
         },
         #'
@@ -78,21 +89,22 @@ Tower <- R6::R6Class("Tower",
                 purrr::map_dfr(~.x)
         },
         #'
-        #' Create a new project
+        #' Create a new project from fastq
         #'
         #' @param project_name The name of the project.
         #' @param submitter_email The email of the submitter.
         #' @param metadata_file A metadata file.
         #' @param fastq_files A list of FASTQ files.
         #' @param pipeline The pipeline to use.
-        create_new_project = function(project_name, submitter_email, metadata_file, fastq_files, pipeline) {
+        create_new_project_fq = function(project_name, submitter_email, metadata_file, fastq_files, pipeline) {
             # Generate project ID
+            cproject_name <- gsub(" ", "_", project_name)
             random_str <- paste(sample(c(0:9, letters, LETTERS), 20, replace = TRUE), collapse = "")
             sha256_hash <- digest::digest(random_str, algo = "sha256", serialize = FALSE)
-            project_id <- paste0(project_name, "_", substr(sha256_hash, 1, 16))
+            project_id <- paste0(submitter_email, "_", cproject_name, "_", substr(sha256_hash, 1, 6))
 
             # Create project folder
-            project_folder <- file.path(self$base_folder, "incoming_data", project_id)
+            project_folder <- file.path(self$base_folder, "public_data", project_id)
             fs::dir_create(project_folder, recurse = TRUE, mode = "644")
 
             # Save metadata
@@ -117,29 +129,86 @@ Tower <- R6::R6Class("Tower",
             }
 
             return(project_id)
+        },
+        #'
+        #' Create a new project from abundance file
+        #'
+        #' @import readr dplyr
+        #' @param project_name The name of the project.
+        #' @param submitter_email The email of the submitter.
+        #' @param metadata_file A metadata file.
+        #' @param fastq_files A list of FASTQ files.
+        #' @param pipeline The pipeline to use.
+        create_new_project_abundance = function(project_name, submitter_email, metadata_file, abundance_file) {
+
+            cproject_name <- gsub(" ", "_", project_name)
+            random_str <- paste(sample(c(0:9, letters, LETTERS), 20, replace = TRUE), collapse = "")
+            sha256_hash <- digest::digest(random_str, algo = "sha256", serialize = FALSE)
+            project_id <- paste0(submitter_email, "_", cproject_name, "_", substr(sha256_hash, 1, 6))
+
+            # Create project folder
+            dir_mode = "755"
+            fil_mode = "644"
+
+            # Create project folder
+            project_folder <- file.path(self$base_folder, "public_data", project_id)
+            phyloseq_folder <- file.path(project_folder, "phyloseq", "complete")
+            alpha_folder <- file.path(project_folder, "phyloseq", "alpha")
+            beta_folder <- file.path(project_folder, "phyloseq", "beta")
+
+            fs::dir_create(project_folder, recurse = TRUE, mode = dir_mode)
+            fs::dir_create(phyloseq_folder, recurse = TRUE, mode = dir_mode)
+            fs::dir_create(alpha_folder, recurse = TRUE, mode = dir_mode)
+            fs::dir_create(beta_folder, recurse = TRUE, mode = dir_mode)
+            fs::dir_create(file.path(beta_folder, "nmds"), recurse = TRUE, mode = dir_mode)
+            fs::dir_create(file.path(beta_folder, "pcoa"), recurse = TRUE, mode = dir_mode)
+
+            ps <- calculate_phyloseq(metadata_file, abundance_file)
+            a_div <- calculate_alpha_diversity(ps)
+            b_div_asv <- calculate_beta_diversity(ps)
+            b_div_fam <- calculate_beta_diversity_rank(ps, "Family")
+
+            # Create overview.json
+            overview <- list(
+                id = project_id,
+                owner = submitter_email,
+                name = project_name,
+                run_command = list(
+                    dataset = "Imported from abundance table"
+                ),
+                status = "Finished"
+            )
+
+            json <- toJSON(overview, pretty = TRUE)
+            write(json, file = file.path(project_folder, "overview.json"))
+
+            # Save rds file
+            saveRDS(ps, file = file.path(phyloseq_folder, "phyloseq.RDS"))
+            saveRDS(a_div, file = file.path(alpha_folder, "alpha_asv.RDS"))
+            saveRDS(b_div_asv, file = file.path(beta_folder, "beta_asv.RDS"))
+
+            # Write metadata.csv for compatibility
+            metadata_file %>%
+              read_tsv() %>%
+              write_csv(file.path(project_folder, "metadata.csv"))
+
+            # Save alpha diversity file
+            readr::write_tsv(a_div[["otu"]], file.path(alpha_folder, "alpha_metrics_otu.tsv"))
+            readr::write_tsv(a_div[["species"]], file.path(alpha_folder, "alpha_metrics_sp.tsv"))
+            readr::write_tsv(a_div[["genus"]], file.path(alpha_folder, "alpha_metrics_gen.tsv"))
+            readr::write_tsv(a_div[["family"]], file.path(alpha_folder, "alpha_metrics_fam.tsv"))
+
+            # Save beta diversity file
+            # 1 is bray, 2 is jaccard
+            readr::write_tsv(b_div_asv$PCoA[[1]], file.path(beta_folder, "pcoa", "bray_asv.tsv"))
+            readr::write_tsv(b_div_asv$NMDS[[1]], file.path(beta_folder, "nmds", "bray_asv.tsv"))
+            readr::write_tsv(b_div_asv$PCoA[[2]], file.path(beta_folder, "pcoa", "jaccard_asv.tsv"))
+            readr::write_tsv(b_div_asv$NMDS[[2]], file.path(beta_folder, "nmds", "jaccard_asv.tsv"))
+
+            # Update value
+            self$num_projects(self$num_projects() + 1)
+
+            return(project_id)
         }
     )
 )
-
-
-NAMES <- c("John", "Mary", "Peter", "Paul", "Jane", "Anne", "Lucy", "Mark", "Lisa", "Kate")
-WORKFLOWS <- c("16s", "wgs", "ITS")
-STATUS <- c("SUBMITTED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED")
-
-generate_sample <- function(seed = NA) {
-    if (!is.na(seed)) set.seed(seed)
-
-    list(
-        launchId = digest::digest(as.character(Sys.time()), algo = "md5", serialize = FALSE),
-        userName = sample(NAMES, 1, replace = T),
-        status = sample(STATUS, 1, replace = T),
-        start = generate_time() # Random number from 0 to 20,
-    )
-}
-
-# A function that generate a random time from 50 seconds to 2 hours.
-# Generate time in a format of Feb 20, 2021 12:00:00
-generate_time <- function() {
-    a_time <- sample(c(50:7200), 1)
-    format(Sys.time() - a_time, "%b %d, %Y %H:%M:%S")
-}

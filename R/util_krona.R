@@ -43,6 +43,7 @@ krona <-
              ranks = "All",
              add_unassigned_rank = 0,
              name = NULL) {
+
         if (ranks[1] == "All") {
             ranks <- seq_along(physeq@tax_table[1, ])
         }
@@ -91,8 +92,11 @@ krona <-
         )
 
         cmd <- paste("ktImportText ", interm_txt, " -o ", file, sep = "")
+
         system(command = cmd)
         system(command = paste("rm", interm_txt))
+
+        logger::log_info("F")
     }
 
 ###############################################################################

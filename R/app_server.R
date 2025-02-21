@@ -3,30 +3,36 @@
 #' @param input,output,session Internal parameters for {shiny}.
 #' @import shiny shinycssloaders shiny.router glue
 #' @noRd
+#'
 app_server <- function(input, output, session) {
-
     log_info("Starting SYSMIOME")
 
+    # Quick hack for main page
+    observeEvent(input$go_upload, {
+        updateTabsetPanel(session, "mainTab", selected = "New Project")
+    })
+    
+    observeEvent(input$go_viewer, {
+        updateTabsetPanel(session, "mainTab", selected = "Viewer")
+    })
+
+    # / Quick hack for the main page
+
+    # Make sure that it is silence when we read file
+    options(readr.show_col_types = FALSE)
 
     # Hard code the base folder
     session$userData$BASEFOLDER <- "/sysmiome"
 
     tower <- Tower$new("/sysmiome")
-    project_id <- project_selection_server("project_selector", tower)
-
-    project_obj <- reactive({
-        return(tower$get_project(project_id()))
-    }) |> bindEvent(project_id())
 
     shiny::isolate({
         hostname <- session$clientData$url_hostname
         pathname <- session$clientData$url_pathname
     })
 
-    ui_server(project_obj = project_obj)
-
+    ui_server(tower = tower)
     sv_new_project(tower = tower)
-    sv_monitor(tower = tower)
 
     # Define HTTP API endpoint
     ggplot_url_svg <- session$registerDataObj(
@@ -59,5 +65,4 @@ app_server <- function(input, output, session) {
     #   session$token, "/dataobj/", namekk
     # )
     # print(uri)
-    
 }

@@ -1,8 +1,7 @@
 Package: sysmiome.serve
 Title: Sysmiome-Serve: microbiome platform service
-Version: 0.0.3.0000
-Authors@R: 
-    person("Preecha", "Patumcharoenpol", , "yumyai@gmail.com", role = c("cre", "aut"))
+Version: 0.0.6.0000
+Authors@R: person('Preecha', 'Patumcharoenpol', email = 'yumyai@gmail.com', role = c('cre', 'aut'))
 Description: Soon.
 License: Apache License (>= 2)
 Imports: 
@@ -10,6 +9,7 @@ Imports:
     biomformat,
     Biostrings,
     config,
+    ComplexHeatmap,
     data.table,
     digest,
     dplyr,
@@ -20,10 +20,12 @@ Imports:
     ggplot2,
     glue,
     golem,
+    Hmisc,
     jsonlite,
     logger,
     magrittr,
     microbiome,
+    openxlsx,
     phyloseq,
     purrr,
     R6,
@@ -34,7 +36,8 @@ Imports:
     tibble,
     tidyr
 Remotes:
-    git::https://github.com/daattali/shinycssloaders@2f2623fa8762c7351e5e6d044d3dae08a677b06f
+    git::https://github.com/daattali/shinycssloaders@2f2623fa8762c7351e5e6d044d3dae08a677b06f,
+    url::https://github.com/david-barnett/microViz/archive/refs/tags/0.12.6.tar.gz
 biocViews: Metagenomics,Microbiome,Sequencing,SystemsBiology
 Encoding: UTF-8
 LazyData: true

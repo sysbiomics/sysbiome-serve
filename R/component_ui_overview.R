@@ -7,7 +7,7 @@ json_data <- '{
         "parameter": "nextflow run main.nf -profile docker",
         "dataset": "public/nextflow-datasets/rnaseq"
     },
-    "status": "finished"
+    "status": "Finished"
 }'
 
 #' @import shiny
@@ -35,9 +35,13 @@ sv_overview <- function(id = "ID_OVERVIEW_VIEWER", project_obj_reactive) {
             # Add ASV, number of samples, and metadata.
             ps_list <- project_obj_reactive()$get_taxa_data()
             ps_dat <- ps_list$ps
-            metadata <- ps_list$meta
+            metadata <- project_obj_reactive()$get_metadata()
             jsondat$`Samples (n)` <- nsamples(ps_dat)
             jsondat$`Metadata (n)` <- ncol(metadata)
+            # jsondat$`Metadata (n)` <- list(
+            #     cat = 3,
+            #     num = 4
+            # )
 
             jsondat
         }) |> bindEvent(project_obj_reactive())

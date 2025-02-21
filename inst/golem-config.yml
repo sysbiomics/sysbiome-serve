@@ -1,6 +1,6 @@
 default:
   golem_name: sysmiome.serve
-  golem_version: 0.0.0.0001
+  golem_version: 0.0.3.0001
   app_prod: no
 production:
   app_prod: yes

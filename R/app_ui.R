@@ -10,16 +10,13 @@ main_ui <- function() {
         golem_add_external_resources(),
         # Your application UI logic
         fluidPage(
-            shinycssloaders::withSpinner(
-                navbarPage(
-                    title = "SYSMIOME",
-                    tabPanel("Home", homePage),
-                    tabPanel("New Project", ui_new_project()),
-                    tabPanel("Viewer", ui_viewer()),
-                    tabPanel("Monitors", ui_monitor()),
-                    tabPanel("Public Datasets", aboutPage),
-                    tabPanel("About", aboutPage)
-                )
+            navbarPage(
+                id = "mainTab",
+                title = "SYSMIOME",
+                tabPanel("Home", homePage),
+                tabPanel("New Project", ui_new_project()),
+                tabPanel("Viewer", ui_viewer()),
+                tabPanel("About", aboutPage)
             )
         )
     )
