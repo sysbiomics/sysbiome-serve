@@ -96,40 +96,42 @@ Tower <- R6::R6Class("Tower",
         #' @param metadata_file A metadata file.
         #' @param fastq_files A list of FASTQ files.
         #' @param pipeline The pipeline to use.
-        create_new_project_fq = function(project_name, submitter_email, metadata_file, fastq_files, pipeline) {
-            # Generate project ID
-            cproject_name <- gsub(" ", "_", project_name)
-            random_str <- paste(sample(c(0:9, letters, LETTERS), 20, replace = TRUE), collapse = "")
-            sha256_hash <- digest::digest(random_str, algo = "sha256", serialize = FALSE)
-            project_id <- paste0(submitter_email, "_", cproject_name, "_", substr(sha256_hash, 1, 6))
+        # create_new_project_fq = function(project_name, submitter_email, metadata_file, fastq_files, pipeline) {
+        #     # Generate project ID
+        #     cproject_name <- gsub(" ", "_", project_name)
+        #     random_str <- paste(sample(c(0:9, letters, LETTERS), 20, replace = TRUE), collapse = "")
+        #     sha256_hash <- digest::digest(random_str, algo = "sha256", serialize = FALSE)
+        #     # project_id <- paste0(submitter_email, "_", cproject_name, "_", substr(sha256_hash, 1, 6))
+        #     project_id <- paste0(cproject_name, "_", substr(sha256_hash, 1, 6))
 
-            # Create project folder
-            project_folder <- file.path(self$base_folder, "public_data", project_id)
-            fs::dir_create(project_folder, recurse = TRUE, mode = "644")
+        #     # Create project folder
+        #     project_folder <- file.path(self$base_folder, "public_data", project_id)
+        #     fs::dir_create(project_folder, recurse = TRUE, mode = "644")
 
-            # Save metadata
-            target_metadata <- file.path(project_folder, "metadata.csv")
-            fs::file_copy(metadata_file$datapath, target_metadata)
-            fs::file_chmod(target_metadata, mode = "0660")
+        #     # Save metadata
+        #     target_metadata <- file.path(project_folder, "metadata.csv")
+        #     fs::file_copy(metadata_file$datapath, target_metadata)
+        #     fs::file_chmod(target_metadata, mode = "0660")
 
-            # Save project info
-            project_info <- list(
-                project_name = project_name,
-                submitter_email = submitter_email,
-                pipeline = pipeline
-            )
-            writeLines(jsonlite::toJSON(project_info, auto_unbox = TRUE), file.path(project_folder, "project_info.json"))
+        #     # Save project info
+        #     project_info <- list(
+        #         project_name = project_name,
+        #         submitter_email = submitter_email,
+        #         pipeline = pipeline
+        #     )
 
-            # Copy fastq files
-            for (i in seq_along(fastq_files$datapath)) {
-                src_path <- fastq_files$datapath[i]
-                tgt_path <- file.path(project_folder, fastq_files$name[i])
-                fs::file_move(src_path, tgt_path)
-                fs::file_chmod(tgt_path, mode = "0660")
-            }
+        #     writeLines(jsonlite::toJSON(project_info, auto_unbox = TRUE), file.path(project_folder, "project_info.json"))
 
-            return(project_id)
-        },
+        #     # Copy fastq files
+        #     for (i in seq_along(fastq_files$datapath)) {
+        #         src_path <- fastq_files$datapath[i]
+        #         tgt_path <- file.path(project_folder, fastq_files$name[i])
+        #         fs::file_move(src_path, tgt_path)
+        #         fs::file_chmod(tgt_path, mode = "0660")
+        #     }
+
+        #     return(project_id)
+        # },
         #'
         #' Create a new project from abundance file
         #'
@@ -144,7 +146,8 @@ Tower <- R6::R6Class("Tower",
             cproject_name <- gsub(" ", "_", project_name)
             random_str <- paste(sample(c(0:9, letters, LETTERS), 20, replace = TRUE), collapse = "")
             sha256_hash <- digest::digest(random_str, algo = "sha256", serialize = FALSE)
-            project_id <- paste0(submitter_email, "_", cproject_name, "_", substr(sha256_hash, 1, 6))
+            # project_id <- paste0(submitter_email, "_", cproject_name, "_", substr(sha256_hash, 1, 6))
+            project_id <- paste0(cproject_name, "_", substr(sha256_hash, 1, 6))
 
             # Create project folder
             dir_mode = "755"

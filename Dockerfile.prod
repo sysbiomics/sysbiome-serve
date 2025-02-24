@@ -27,7 +27,7 @@ COPY DESCRIPTION /tmp/tmpdesc/
 RUN R -e "devtools::install_deps('/tmp/tmpdesc')"
 
 # Install package
-ARG PACKAGE=sysmiome.serve_0.0.6.0000.tar.gz 
+ARG PACKAGE=sysmiome.serve_0.0.7.0000.tar.gz 
 COPY build/${PACKAGE} /tmp/
 RUN R -e "install.packages('/tmp/${PACKAGE}', repos = NULL)"
 

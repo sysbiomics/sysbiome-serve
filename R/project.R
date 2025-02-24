@@ -113,8 +113,9 @@ Project <- R6::R6Class("Project",
         initialize = function(folder_path) {
             self$folder_path <- folder_path
             self$ps <- readRDS(file.path(self$folder_path, "phyloseq/complete/phyloseq.RDS")) %>%
-                tax_fix(verbose = FALSE) %>%
-                tax_filter(min_prevalence = 5 / 100, min_total_abundance = 20, verbose = FALSE)
+                tax_fix(verbose = FALSE)
+                # %>%
+                # tax_filter(min_prevalence = 5 / 100, min_total_abundance = 20, verbose = FALSE)
             self$validate()
         },
 
@@ -199,24 +200,6 @@ Project <- R6::R6Class("Project",
             taxa_tib <- tax_tibble(ps_dat)
             extract_taxa_name(taxa_tib)
         },
-        #' @description
-        #' Calculate correlation between taxa
-        # get_correlation_data = function(rank = NULL) {
-        #     # Do nothing if rank is null
-        #     if (is.null(rank)) {
-        #         agg_func <- function(ps, ...) {
-        #             return(ps)
-        #         }
-        #     } else {
-        #         agg_func <- aggregate_taxa
-        #     }
-        #     self$get_taxa_data()$ps %>%
-        #         tax_fix(verbose = FALSE) %>%
-        #         tax_filter(min_prevalence = 5 / 100, tax_level = rank) %>%
-        #         tax_agg(rank) %>%
-        #         correlation_calc() %>%
-        #         reshape_corr()
-        # },
         get_correlation_data = function(rank = NULL) {
             # Do nothing if rank is null
             if (is.null(rank)) {
@@ -242,7 +225,8 @@ Project <- R6::R6Class("Project",
 
             list(meta = meta_dat)
         },
-        get_filtered_metadata = function() {
+        get_cat_metadata = function() {
+            # Unironically, this also get cat data because of its requirement
             max_category_ratio <- 0.3
             max_na_ratio <- 0.5
             n_samples <- phyloseq::nsamples(self$get_taxa_data()$ps)
@@ -263,7 +247,7 @@ Project <- R6::R6Class("Project",
                 dplyr::select(1, where(is.numeric))
 
             return(
-                metadata_num = metadata_num ,
+                metadata_num = metadata_num,
                 metadata_cat = metadata_cat
             )
         },
@@ -393,7 +377,7 @@ cor_calc <- function(data,
                      taxon_renamer = identity,
                      vars = NA,
                      var_anno = NULL,
-                     cor = c("pearson", "kendall", "spearman"),
+                     cor = "spearman",
                      cor_use = "everything",
                      var_fun = "identity",
                      ...) {

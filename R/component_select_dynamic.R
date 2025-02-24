@@ -25,7 +25,7 @@ sv_select_metadata <- function(id, project_obj, label_text) {
             selected_value <- reactiveVal(PLACE_HOLDER_CHOICE)
 
             observeEvent(project_obj(), {
-                metadata_choices <- setdiff(colnames(project_obj()$get_filtered_metadata()$meta), "ID_sample")
+                metadata_choices <- setdiff(colnames(project_obj()$get_cat_metadata()$meta), "ID_sample")
                 metadata_choices <- c(PLACE_HOLDER_CHOICE, metadata_choices)
 
                 updateSelectInput(

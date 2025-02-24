@@ -1,6 +1,6 @@
 Package: sysmiome.serve
 Title: Sysmiome-Serve: microbiome platform service
-Version: 0.0.6.0000
+Version: 0.0.7.0000
 Authors@R: person('Preecha', 'Patumcharoenpol', email = 'yumyai@gmail.com', role = c('cre', 'aut'))
 Description: Soon.
 License: Apache License (>= 2)

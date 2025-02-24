@@ -58,7 +58,7 @@
 #             NS <- session$ns
 
 #             dbe <- reactive({
-#                 x_choices <- setdiff(colnames(project_obj()$get_filtered_metadata()$meta), "ID_sample")
+#                 x_choices <- setdiff(colnames(project_obj()$get_cat_metadata()$meta), "ID_sample")
 #                 x_choices <- c("Select an option", x_choices)
 
 #                 updateSelectInput(
@@ -194,7 +194,7 @@ sv_beta <- function(id = "ID_BETA_MODULE", project_obj) {
 
                 ggplot(data = dat, aes(x = .data[[x_axis]], y = .data[[y_axis]], color = factor(.data[[colourBy]]))) +
                     geom_point(size = 4) +
-                    stat_ellipse(linetype = 2)
+                    stat_ellipse(linetype = 2) + theme_bw()
             })
 
             output$export_beta_plot <- downloadHandler(

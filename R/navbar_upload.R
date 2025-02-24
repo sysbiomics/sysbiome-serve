@@ -75,8 +75,9 @@ gen_metadata <- function(){
         sample_id = paste0("s", 1:30),
         date = rep(c("0day", "10days"), each = 15),
         treatment = rep(c("control", "untreat"), length.out = 30),
-        location = rep(c("v1", "v2", "v3"), length.out = 30)
-    )
+        location = rep(c("v1", "v2", "v3"), length.out = 30),
+        numeric_col1 = sample(0:20, 30, replace = TRUE),
+        numeric_col2 = sample(0:20, 30, replace = TRUE))
 }
 
 #' @import readr
@@ -175,8 +176,6 @@ sv_abundance_upload <- function(id = "ID_ABUNDANCE_MODULE", tower) {
         }
     )
 }
-
-
 
 ui_new_project <- function(id = "ID_NEW_MODULE") {
     ns <- NS(id)

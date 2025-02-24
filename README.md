@@ -17,14 +17,23 @@ SYSMIOME is an integrated toolbox for microbiome data analysis designed for clin
 
 ### Visualization Modules
 
-- **Alpha Diversity**  
-- **Beta Diversity**  
-- **Taxonomy**  
-- **Correlation**
+- **Alpha Diversity visualization**  
+- **Beta Diversity visualization**  
+- **Taxonomy visualization**  
+- **Correlation analyis**
 
-### Secure Local Deployment
+### Deployment with docker
 
 SYSMIOME offers a [Docker image](https://hub.docker.com/r/yumyai/sysmiome-serve) for local deployment, ensuring that analyses are conducted within a secure and controlled environment—a critical feature for clinical projects handling sensitive data.
+
+``` bash
+wget --content-disposition https://osf.io/gfhx2/download && tar -xzf sysmiome_data.tar.gz
+docker run --rm -p 6644:3838 --user shiny --group-add $(id -g) --mount type=bind,source="$(pwd)"/sysmiome_dta,target=/sysmiome yumyai/sysmiome-serve:0.0.7-dev
+```
+The local installation should be http://localhost:6644/.
+
+## Demo
+You can view a live demo [here](https://demo.techumya.net/)
 
 ## License
 

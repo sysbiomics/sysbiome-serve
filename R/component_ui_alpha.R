@@ -73,7 +73,7 @@
 #         function(input, output, session) {
 
 #             adat <- reactive({
-#                 xchoices <- setdiff(colnames(project_obj()$get_filtered_metadata()$meta), "ID_sample")
+#                 xchoices <- setdiff(colnames(project_obj()$get_cat_metadata()$meta), "ID_sample")
 #                 xchoices <- c(PLACE_HOLDER_CHOICE, xchoices) # Add an empty choice as the first option
 
 #                 updateSelectInput(
@@ -97,7 +97,7 @@
 
 #             # Update input2 choices dynamically based on input1 selection
 #             observeEvent(input$xlab_selection, {
-#                 xchoices <- setdiff(colnames(project_obj()$get_filtered_metadata()$meta), "ID_sample")
+#                 xchoices <- setdiff(colnames(project_obj()$get_cat_metadata()$meta), "ID_sample")
 #                 selected1 <- input$xlab_selection
 #                 updated_choices <- if (selected1 != "Select an option") setdiff(xchoices, selected1) else xchoices
 #                 updateSelectInput(session, "group_selection", choices = updated_choices, selected = "Select an option")
@@ -235,7 +235,7 @@ sv_alpha <- function(id = "ID_ALPHA_MODULE", project_obj) {
 
             # Update group_selection choices (with placeholder)
             observeEvent(xlab_selection(), { # React to xlab_selection changes
-                xchoices <- setdiff(colnames(project_obj()$get_filtered_metadata()$meta), "ID_sample")
+                xchoices <- setdiff(colnames(project_obj()$get_cat_metadata()$meta), "ID_sample")
                 selected_xlab <- xlab_selection()
 
                 updated_choices <- if (selected_xlab != "Select an option") {
@@ -268,8 +268,6 @@ sv_alpha <- function(id = "ID_ALPHA_MODULE", project_obj) {
                         return()
                     }
 
-                    # ... (rest of the plotting code remains the same)
-
                     .dat_alpha <- dat_alpha$alpha %>%
                         tidyr::pivot_longer(-ID_sample, names_to = "alpha_measure") %>%
                         dplyr::filter(alpha_measure %in% measures)
@@ -287,7 +285,7 @@ sv_alpha <- function(id = "ID_ALPHA_MODULE", project_obj) {
                         gg_plot <- gg_plot + facet_grid(rows = vars(.data[["alpha_measure"]]), cols = vars(.data[[group]]), scales = "free_y")
                     }
 
-                    gg_plot
+                    gg_plot + theme_bw()
                 },
                 res = 96
             )

@@ -125,25 +125,21 @@ sv_barplot <- function(id = "ID_BAR_COMP", project_obj) {
                     return()
                 }
 
+                ggbase <- indplot(dat_ps, tlevel, 20, tlevel) %>%
+                        ggplot() +
+                        aes(x = ID_sample, y = abn, fill = .data[[tlevel]]) +
+                        geom_bar(stat = "identity") +
+                        ylab("Relative Abundance (%)") +
+                        scale_fill_manual(values = a1_pallete) +
+                        scale_x_discrete(guide = guide_axis(angle = 60))
+
                 if (is_choice_valid(tax_group)) {
-                    indplot(dat_ps, tlevel, 20, tlevel) %>%
-                        ggplot() +
-                        aes(x = ID_sample, y = abn, fill = .data[[tlevel]]) +
+                    ggbase +
                         facet_wrap(~ .data[[tax_group]], scales = "free_x") +
-                        geom_bar(stat = "identity") +
-                        ylab("Relative Abundance (%)") +
-                        scale_fill_manual(values = a1_pallete) +
-                        scale_x_discrete(guide = guide_axis(angle = 45)) +
-                        theme(axis.text.x = element_text(size = 8))
+                        theme(axis.text.x = element_text(size = 8)) + theme_bw() + scale_y_continuous(limits = c(0, 100), expand = c(0, 0))
                 } else {
-                    indplot(dat_ps, tlevel, 20, tlevel) %>%
-                        ggplot() +
-                        aes(x = ID_sample, y = abn, fill = .data[[tlevel]]) +
-                        geom_bar(stat = "identity") +
-                        ylab("Relative Abundance (%)") +
-                        scale_fill_manual(values = a1_pallete) +
-                        scale_x_discrete(guide = guide_axis(angle = 45)) +
-                        theme(axis.text.x = element_text(size = 8))
+                    ggbase +
+                        theme(axis.text.x = element_text(size = 8))  + theme_bw() + scale_y_continuous(limits = c(0, 100), expand = c(0, 0))
                 }
             }) |> bindCache(project_obj(), input$tax_level, tax_group_reactive()) # Cache with the reactive value
         }
@@ -331,7 +327,8 @@ sv_correlation <- function(id = "ID_CORR_COMP", project_obj) {
                     cor_heatmap(
                         taxa = tax_top(., n = 20),
                         seriation_method = "Identity",
-                        tax_anno = NULL
+                        tax_anno = NULL,
+                        cor = "spearman",
                     )
             }) |>
                 bindCache(input$cor_tax_level) |>
