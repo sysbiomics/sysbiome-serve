@@ -2,7 +2,7 @@
 
 SYSMIOME is an integrated toolbox for microbiome data analysis designed for clinical research. It provides a comprehensive workflow for processing, exploring, and visualizing microbiome datasets while ensuring data security through a Docker-based local implementation.
 
-## Requirements & Dependencies
+## 1. Requirements & Dependencies
 
 - **System Requirements:**  
   - Linux environment  
@@ -13,7 +13,8 @@ SYSMIOME is an integrated toolbox for microbiome data analysis designed for clin
   - OTU abundance tables  
   - Corresponding sample metadata
 
-## Implementation
+## 2. Demo
+You can view a live demo [here](https://demo.techumya.net/)
 
 ### Visualization Modules
 
@@ -22,18 +23,33 @@ SYSMIOME is an integrated toolbox for microbiome data analysis designed for clin
 - **Taxonomy visualization**  
 - **Correlation analyis**
 
-### Deployment with docker
+### 3. Deployment with docker
 
-SYSMIOME offers a [Docker image](https://hub.docker.com/r/yumyai/sysmiome-serve) for local deployment, ensuring that analyses are conducted within a secure and controlled environment—a critical feature for clinical projects handling sensitive data.
+SYSMIOME offers a [Docker image](https://hub.docker.com/r/yumyai/sysmiome-serve) for local deployment, ensuring that analyses are conducted within a secure and controlled environment—a critical feature for clinical projects handling sensitive data. Note: The data downloaded via the wget command includes the supplementary datasets used to illustrate the toolbox in two prospective clinical studies.
 
 ``` bash
-wget --content-disposition https://osf.io/gfhx2/download && tar -xzf sysmiome_data.tar.gz
-docker run --rm -p 6644:3838 --user shiny --group-add $(id -g) --mount type=bind,source="$(pwd)"/sysmiome_dta,target=/sysmiome yumyai/sysmiome-serve:0.0.7-dev
-```
-The local installation should be http://localhost:6644/.
+# Download and extract the data first (if not already done)
+wget --content-disposition https://osf.io/gfhx2/download && tar -xzf sysmiome_data.tar.gz && rm sysmiome_data.tar.gz
 
-## Demo
-You can view a live demo [here](https://demo.techumya.net/)
+# Copy files from local extracted folder into the volume
+docker run --rm \
+	-v sysmiome_data:/data \
+	-v "$(pwd)/sysmiome_data":/from_host \
+	alpine:3.21.3 cp -r /from_host/. /data/ &&
+	rm -r ./sysmiome_data
+
+docker run --rm \
+  -v sysmiome_data:/data \
+  alpine:3.21.3 sh -c "chmod -R a+rwX /data"
+
+docker run --rm -p 6644:3838 \
+	--user shiny \
+	--group-add $(id -g) \
+	-v sysmiome_data:/sysmiome \
+	yumyai/sysmiome-serve:0.0.7-dev
+```
+
+The local installation should be http://localhost:6644/.
 
 ## License
 
