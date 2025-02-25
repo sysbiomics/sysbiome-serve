@@ -14,7 +14,7 @@ SYSMIOME is an integrated toolbox for microbiome data analysis designed for clin
   - Corresponding sample metadata
 
 ## Demo
-Available at [http://sysmiome.techumya.net/](http://sysmiome.techumya.net/)
+Available at [http://sysmiome.techumya.net/](http://demo.techumya.net/)
 
 ### Visualization Modules
 
