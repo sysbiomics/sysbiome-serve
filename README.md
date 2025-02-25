@@ -13,7 +13,8 @@ SYSMIOME is an integrated toolbox for microbiome data analysis designed for clin
   - OTU abundance tables  
   - Corresponding sample metadata
 
-## Implementation
+## Demo
+Available at [http://sysmiome.techumya.net/](http://sysmiome.techumya.net/)
 
 ### Visualization Modules
 
