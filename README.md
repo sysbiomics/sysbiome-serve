@@ -25,12 +25,13 @@ Available at [http://sysmiome.techumya.net/](http://demo.techumya.net/)
 
 ### Deployment with docker
 
-SYSMIOME offers a [Docker image](https://hub.docker.com/r/yumyai/sysmiome-serve) for local deployment, ensuring that analyses are conducted within a secure and controlled environment—a critical feature for clinical projects handling sensitive data.
+SYSMIOME offers a [Docker image](https://hub.docker.com/r/yumyai/sysmiome-serve) for local deployment, ensuring that analyses are conducted within a secure and controlled environment—a critical feature for clinical projects handling sensitive data. Note: The data downloaded via the wget command includes the supplementary datasets used to illustrate the toolbox in two prospective clinical studies.
 
 ``` bash
 wget --content-disposition https://osf.io/gfhx2/download && tar -xzf sysmiome_data.tar.gz
 docker run --rm -p 6644:3838 --user shiny --group-add $(id -g) --mount type=bind,source="$(pwd)"/sysmiome_dta,target=/sysmiome yumyai/sysmiome-serve:0.0.7-dev
 ```
+
 The local installation should be http://localhost:6644/.
 
 ## Demo
