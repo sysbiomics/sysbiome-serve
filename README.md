@@ -2,7 +2,7 @@
 
 SYSMIOME is an integrated toolbox for microbiome data analysis designed for clinical research. It provides a comprehensive workflow for processing, exploring, and visualizing microbiome datasets while ensuring data security through a Docker-based local implementation.
 
-## Requirements & Dependencies
+## 1. Requirements & Dependencies
 
 - **System Requirements:**  
   - Linux environment  
@@ -13,8 +13,8 @@ SYSMIOME is an integrated toolbox for microbiome data analysis designed for clin
   - OTU abundance tables  
   - Corresponding sample metadata
 
-## Demo
-Available at [http://demo.techumya.net/](http://demo.techumya.net/)
+## 2. Demo
+You can view a live demo [here](https://demo.techumya.net/)
 
 ### Visualization Modules
 
@@ -23,7 +23,7 @@ Available at [http://demo.techumya.net/](http://demo.techumya.net/)
 - **Taxonomy visualization**  
 - **Correlation analyis**
 
-### Deployment with docker
+### 3. Deployment with docker
 
 SYSMIOME offers a [Docker image](https://hub.docker.com/r/yumyai/sysmiome-serve) for local deployment, ensuring that analyses are conducted within a secure and controlled environment—a critical feature for clinical projects handling sensitive data. Note: The data downloaded via the wget command includes the supplementary datasets used to illustrate the toolbox in two prospective clinical studies.
 
@@ -33,9 +33,6 @@ docker run --rm -p 6644:3838 --user shiny --group-add $(id -g) --mount type=bind
 ```
 
 The local installation should be http://localhost:6644/.
-
-## Demo
-You can view a live demo [here](https://demo.techumya.net/)
 
 ## License
 
