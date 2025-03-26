@@ -29,7 +29,7 @@ SYSMIOME offers a [Docker image](https://hub.docker.com/r/yumyai/sysmiome-serve)
 
 ``` bash
 wget --content-disposition https://osf.io/gfhx2/download && tar -xzf sysmiome_data.tar.gz
-docker run --rm -p 6644:3838 --user shiny --group-add $(id -g) --mount type=bind,source="$(pwd)"/sysmiome_dta,target=/sysmiome yumyai/sysmiome-serve:0.0.7-dev
+docker run --rm -p 6644:3838 --user shiny --group-add $(id -g) --mount type=bind,source="$(pwd)"/sysmiome_data,target=/sysmiome yumyai/sysmiome-serve:0.0.7-dev
 ```
 
 The local installation should be http://localhost:6644/.
